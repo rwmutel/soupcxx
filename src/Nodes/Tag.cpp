@@ -2,6 +2,7 @@
 // Created by letumnamor on 5/1/24.
 //
 #include "Tag.h"
+#include <optional>
 
 std::vector<Tag> parse_top_level_html(std::string_view content) {
     std::size_t tag_end_pos;
@@ -124,4 +125,35 @@ std::string Tag::serialize_html() const {
         serialized_html += '\n';
     serialized_html += "</" + tag_name_m + ">\n";
     return serialized_html;
+}
+
+std::optional<Tag> Tag::find(std::string_view tag_name) {
+    std::optional<Tag> child_found;
+    for (auto& child : children_m) {
+        if (child.tag_name_m == tag_name) {
+            return child;
+        }
+        child_found = child.find(tag_name);
+        if (child_found.has_value()) {
+            return child.find(tag_name);
+        }
+    }
+    return std::nullopt;
+}
+
+std::vector<Tag> Tag::find_all(std::string_view tag_name) {
+    std::vector<Tag> found_tags;
+    for (auto& child : children_m) {
+        if (child.tag_name_m == tag_name) {
+            found_tags.push_back(child);
+        }
+        for (auto& found_child : child.find_all(tag_name)) {
+            found_tags.push_back(found_child);
+        }
+    }
+    return found_tags;
+}
+
+Attribute Tag::operator[](const std::string& key) const {
+    return attributes_m.at(key);
 }

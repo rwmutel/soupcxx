@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <vector>
 #include <regex>
+#include <optional>
 #include "Node.h"
 #include "utils.h"
 
@@ -23,14 +24,15 @@ public:
 //    virtual std::vector<Node> get_descendants();
 //    virtual Node& find(std::regex pattern, AttributeType type=AttributeType::TAG_NAME);
 //
-//    virtual Node& find(TagType tag_name);
+    virtual std::optional<Tag> find(std::string_view tag_name);
 //    virtual Node& find(std::function <bool(Node)> predicate);
 //    virtual std::vector<Node> find_all(std::regex pattern, AttributeType type=AttributeType::TAG_NAME);
-//    virtual std::vector<Node> find_all(TagType tag_name);
+    virtual std::vector<Tag> find_all(std::string_view tag_name);
 //
-//    virtual Attribute operator[](std::string_view key);
+    virtual Attribute operator[](const std::string& key) const;
 //    virtual std::string serialize_md() overrride;
     std::string serialize_html() const override;
+
 };
 
 

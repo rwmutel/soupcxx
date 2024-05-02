@@ -11,6 +11,11 @@ int main() {
     HTMLSoup soup{content};
     std::ofstream alice_out{"../data/alice_out.html"};
     alice_out << soup.get_root().serialize_html() << std::endl;
-    std::cout << soup.find("a") << std::endl;
+    std::cout << "Find the first link tag: " << std::endl;
+    std::cout << soup.find("a").value().serialize_html() << std::endl;
+    std::cout << "Find all links in <a> tags: " << std::endl;
+    for (const auto& tag : soup.find_all("a")) {
+        std::cout << std::get<std::string>(tag["href"]) << std::endl;
+    }
     return 0;
 }
