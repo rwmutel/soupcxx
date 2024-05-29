@@ -1,6 +1,6 @@
 #ifndef PROJECT_SOUP_H
 #define PROJECT_SOUP_H
-#include <optional>
+#include <memory>
 #include <string_view>
 #include <filesystem>
 #include <vector>
@@ -12,10 +12,10 @@
 class Soup {
 public:
 //    virtual Node& find(std::regex pattern, AttributeType type=AttributeType::TAG_NAME)=0;
-    virtual std::optional<Tag> find(std::string_view tag_name)=0;
+    virtual std::shared_ptr<Node> find(std::string_view tag_name)=0;
 //    virtual Node& find(std::function <bool(Node)> predicate)=0;
 //    virtual std::vector<Node> find_all(std::regex pattern, AttributeType type=AttributeType::TAG_NAME)=0;
-    virtual std::vector<Tag> find_all(std::string_view tag_name)=0;
+    virtual std::vector<std::shared_ptr<Node>> find_all(std::string_view tag_name)=0;
 //    virtual Soup prettify()=0;
 //    virtual void prettify_in_place()=0;
 //    virtual std::string serialize()=0;

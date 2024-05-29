@@ -17,30 +17,4 @@ enum class AttributeType {
     TAG_NAME
 };
 
-enum class SoupType {
-    HTML,
-    MD
-};
-
-enum class TagType {
-    HTML,
-    HEAD,
-    TITLE,
-    BODY,
-    H1,
-    H2,
-    H3,
-    H4,
-    H5,
-    H6,
-    P,
-    DIV,
-    SPAN,
-    A,
-    IMG,
-    UL,
-    OL,
-    LI
-};
-
 #endif //PROJECT_UTILS_H

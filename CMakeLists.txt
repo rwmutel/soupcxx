@@ -53,6 +53,8 @@ add_library(soupcxx
 		src/Soups/HTMLSoup.cpp
 		api/soupcxx.h
 		src/Nodes/Tag.cpp
+		src/Nodes/Text.cpp
+		include/Nodes/Text.h
 )
 
 target_include_directories(

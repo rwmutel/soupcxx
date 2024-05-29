@@ -1,32 +1,51 @@
-//
-// Created by letumnamor on 5/1/24.
-//
 #include "Tag.h"
+#include "Text.h"
 #include <optional>
 
-std::vector<Tag> parse_top_level_html(std::string_view content) {
+std::vector<std::shared_ptr<Node>> parse_top_level_html(std::string_view content) {
     std::size_t tag_end_pos;
     std::size_t name_end_pos;
     std::size_t first_space_pos;
     std::size_t first_bracket_pos;
+    std::size_t first_backward_bracket_pos = content.find('>');
     std::string_view tag_name;
     std::size_t tag_name_size;
-    if (content.find('<') == std::string::npos) {
-        return {};
+    std::vector<std::shared_ptr<Node>> tags;
+    std::size_t start_pos = 0;
+    while (std::isspace(content[start_pos])) {
+        ++start_pos;
     }
-    std::vector<Tag> tags;
-    for(std::size_t i = 0; i < content.size(); i++) {
-        if(content[i] == '<' && content[i + 1] != '/') {
+    if (content[start_pos] != '<' && first_backward_bracket_pos != std::string::npos) {
+        start_pos = first_backward_bracket_pos + 1;
+    }
+    for(std::size_t i = start_pos; i < content.size(); i++) {
+        if (std::isspace(content[i])) {
+            continue;
+        }
+        else if (content[i] == '<' && content[i + 1] != '/') {
             first_space_pos = content.find(' ', i);
             first_bracket_pos = content.find('>', i);
             name_end_pos = std::min(first_space_pos, first_bracket_pos);
             tag_name = content.substr(i + 1, name_end_pos - i - 1);
             tag_name_size = name_end_pos - i - 1;
             tag_end_pos = content.find("</"s + std::string(tag_name) + ">"s, i);
-
-            tags.emplace_back(std::string(tag_name),
-                              content.substr(name_end_pos + 1, tag_end_pos - i - 2 - tag_name_size));
+            tags.emplace_back(std::make_shared<Tag>(
+                    std::string(tag_name),
+                    content.substr(name_end_pos + 1, tag_end_pos - i - 2 - tag_name_size)
+                    ));
             i = tag_end_pos + 1;
+        }
+        else {
+            first_bracket_pos = content.find('<', i);
+            first_backward_bracket_pos = content.find('>', i);
+            if (first_bracket_pos == std::string::npos && first_backward_bracket_pos == std::string::npos) {
+                tags.emplace_back(std::make_shared<Text>(content.substr(i)));
+                break;
+            }
+            if (first_bracket_pos < first_backward_bracket_pos && first_bracket_pos != i) {
+                tags.emplace_back(std::make_shared<Text>(content.substr(i, first_bracket_pos - i)));
+                i = first_bracket_pos - 1;
+            }
         }
     }
     return tags;
@@ -77,14 +96,13 @@ std::unordered_map<std::string, Attribute> parse_html_attributes(std::string_vie
 }
 
 Tag::Tag(std::string&& tag_name, std::string_view text) :
-    tag_name_m(tag_name),
     children_m(parse_top_level_html(text)),
     attributes_m(parse_html_attributes(text)) {
     auto bracket_pos = text.find('>');
     if (bracket_pos != std::string::npos) {
         text = text.substr(bracket_pos + 1);
     }
-    text_m = std::string{text};
+    tag_name_m = tag_name;
 }
 
 std::string Tag::serialize_html() const {
@@ -102,23 +120,17 @@ std::string Tag::serialize_html() const {
         serialized_html += attr_serialized + ' ';
     }
     serialized_html += ">\n";
-    std::string indent{"  "};
-    if (children_m.empty()) {
-        serialized_html += indent + text_m;
-    }
-    else {
-        for (const auto &child: children_m) {
-            auto serialized_children = child.serialize_html();
-            size_t startPos = 0;
-            while (startPos < serialized_children.size()) {
-                size_t endPos = serialized_children.find('\n', startPos);
-                if (endPos == std::string::npos) {
-                    endPos = serialized_children.size();
-                }
-                serialized_html += indent + serialized_children.substr(startPos, endPos - startPos) + "\n";
-                startPos = endPos + 1;
+    const std::string indent{"  "};
+    for (const auto& child: children_m) {
+        auto serialized_child = child->serialize_html();
+        size_t startPos = 0;
+        while (startPos < serialized_child.size()) {
+            size_t endPos = serialized_child.find('\n', startPos);
+            if (endPos == std::string::npos) {
+                endPos = serialized_child.size();
             }
-
+            serialized_html += indent + serialized_child.substr(startPos, endPos - startPos) + "\n";
+            startPos = endPos + 1;
         }
     }
     if (serialized_html.back() != '\n')
@@ -127,28 +139,34 @@ std::string Tag::serialize_html() const {
     return serialized_html;
 }
 
-std::optional<Tag> Tag::find(std::string_view tag_name) {
-    std::optional<Tag> child_found;
+std::shared_ptr<Node> Tag::find(std::string_view tag_name) {
+    std::shared_ptr<Node> child_found;
     for (auto& child : children_m) {
-        if (child.tag_name_m == tag_name) {
+        auto child_tag_name = child->get_tag_name();
+        if (child_tag_name == tag_name) {
             return child;
         }
-        child_found = child.find(tag_name);
-        if (child_found.has_value()) {
-            return child.find(tag_name);
+        if (child_tag_name != "text") {
+            child_found = dynamic_cast<Tag*>(child.get())->find(tag_name);
+            if (child_found) {
+                return child_found;
+            }
         }
     }
-    return std::nullopt;
+    return nullptr;
 }
 
-std::vector<Tag> Tag::find_all(std::string_view tag_name) {
-    std::vector<Tag> found_tags;
+std::vector<std::shared_ptr<Node>> Tag::find_all(std::string_view tag_name) {
+    std::vector<std::shared_ptr<Node>> found_tags;
     for (auto& child : children_m) {
-        if (child.tag_name_m == tag_name) {
+        if (child->get_tag_name() == tag_name) {
             found_tags.push_back(child);
         }
-        for (auto& found_child : child.find_all(tag_name)) {
-            found_tags.push_back(found_child);
+        if (child->get_tag_name() != "text") {
+            auto child_nodes = dynamic_cast<Tag*>(child.get())->find_all(tag_name);
+            for (auto &found_child: child_nodes) {
+                found_tags.push_back(found_child);
+            }
         }
     }
     return found_tags;
