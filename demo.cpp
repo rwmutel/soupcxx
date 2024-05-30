@@ -24,5 +24,11 @@ int main() {
     std::cout << "Find the parent of the first link tag: " << std::endl;
     std::cout << "tag name: " << a->get_parent()->get_tag_name() << ", class: "
         << std::get<std::string>((*dynamic_cast<Tag*>(a->get_parent()))["class"]) << std::endl;
+
+    std::cout << "Find the siblings of the first link tag: " << std::endl;
+    for (const auto& sibling : a->get_siblings()) {
+        std::cout << "tag name: " << sibling->get_tag_name()
+            << "\n<serialized>\n" << sibling->serialize_html() << "</serialized>\n" << std::endl;
+    }
     return 0;
 }

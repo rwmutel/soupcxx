@@ -17,4 +17,6 @@ enum class AttributeType {
     TAG_NAME
 };
 
+constexpr std::string TEXT_NODE = "text";
+
 #endif //PROJECT_UTILS_H

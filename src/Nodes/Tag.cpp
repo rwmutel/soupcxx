@@ -180,3 +180,11 @@ Tag::~Tag() {
     children_m.clear();
     attributes_m.clear();
 }
+
+std::vector<std::shared_ptr<Node>> Tag::get_children() const {
+    return children_m;
+}
+
+std::vector<std::shared_ptr<Node>> Tag::get_siblings() const {
+    return dynamic_cast<Tag*>(parent_m)->get_children();
+}

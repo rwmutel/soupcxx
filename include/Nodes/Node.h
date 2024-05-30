@@ -13,6 +13,7 @@ public:
 
     [[nodiscard]] virtual Node* get_parent() const {return parent_m;};
     [[nodiscard]] virtual std::string get_tag_name() const {return tag_name_m;};
+    [[nodiscard]] virtual std::vector<std::shared_ptr<Node>> get_siblings() const=0;
     [[nodiscard]] virtual std::string serialize_html() const = 0;
     virtual ~Node() = default;
 };
