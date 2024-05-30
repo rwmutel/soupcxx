@@ -10,7 +10,9 @@ int main() {
 
     HTMLSoup soup{content};
     std::ofstream alice_out{"../data/alice_out.html"};
-    alice_out << soup.get_root().serialize_html() << std::endl;
+    (*dynamic_cast<Tag*>(soup.find("a").get()))["class"] = "test_class";
+    alice_out << soup.serialize() << std::endl;
+
     std::cout << "Find the first link tag: " << std::endl;
     auto a = soup.find("a");
     std::cout << a->serialize_html() << std::endl;

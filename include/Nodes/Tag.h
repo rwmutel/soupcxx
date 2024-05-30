@@ -27,7 +27,7 @@ public:
 //    virtual std::vector<Node> find_all(std::regex pattern, AttributeType type=AttributeType::TAG_NAME);
     virtual std::vector<std::shared_ptr<Node>> find_all(std::string_view tag_name);
 
-    virtual Attribute operator[](const std::string& key) const;
+    virtual Attribute& operator[](const std::string& key);
     std::string serialize_html() const override;
     virtual ~Tag() override;
 };

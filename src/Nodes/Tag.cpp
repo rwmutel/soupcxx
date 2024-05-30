@@ -172,7 +172,7 @@ std::vector<std::shared_ptr<Node>> Tag::find_all(std::string_view tag_name) {
     return found_tags;
 }
 
-Attribute Tag::operator[](const std::string& key) const {
+Attribute& Tag::operator[](const std::string& key) {
     return attributes_m.at(key);
 }
 
