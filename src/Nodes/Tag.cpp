@@ -2,7 +2,9 @@
 #include "Text.h"
 #include <optional>
 
-std::vector<std::shared_ptr<Node>> parse_top_level_html(std::string_view content) {
+std::vector<std::shared_ptr<Node>> parse_top_level_html(
+        std::string_view content,
+        Tag* parent) {
     std::size_t tag_end_pos;
     std::size_t name_end_pos;
     std::size_t first_space_pos;
@@ -31,7 +33,8 @@ std::vector<std::shared_ptr<Node>> parse_top_level_html(std::string_view content
             tag_end_pos = content.find("</"s + std::string(tag_name) + ">"s, i);
             tags.emplace_back(std::make_shared<Tag>(
                     std::string(tag_name),
-                    content.substr(name_end_pos + 1, tag_end_pos - i - 2 - tag_name_size)
+                    content.substr(name_end_pos + 1, tag_end_pos - i - 2 - tag_name_size),
+                    parent
                     ));
             i = tag_end_pos + 1;
         }
@@ -95,14 +98,11 @@ std::unordered_map<std::string, Attribute> parse_html_attributes(std::string_vie
     return parsed_attributes;
 }
 
-Tag::Tag(std::string&& tag_name, std::string_view text) :
-    children_m(parse_top_level_html(text)),
+Tag::Tag(std::string&& tag_name, std::string_view text, Tag* parent) :
+    children_m(parse_top_level_html(text, this)),
     attributes_m(parse_html_attributes(text)) {
-    auto bracket_pos = text.find('>');
-    if (bracket_pos != std::string::npos) {
-        text = text.substr(bracket_pos + 1);
-    }
     tag_name_m = tag_name;
+    parent_m = parent;
 }
 
 std::string Tag::serialize_html() const {
@@ -174,4 +174,9 @@ std::vector<std::shared_ptr<Node>> Tag::find_all(std::string_view tag_name) {
 
 Attribute Tag::operator[](const std::string& key) const {
     return attributes_m.at(key);
+}
+
+Tag::~Tag() {
+    children_m.clear();
+    attributes_m.clear();
 }
