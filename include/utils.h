@@ -10,13 +10,6 @@ using namespace std::literals;
 
 using Attribute = std::variant<std::string, std::vector<std::string>>;
 
-enum class AttributeType {
-    ID,
-    CLASS,
-    ATTRIBUTE,
-    TAG_NAME
-};
-
 constexpr std::string TEXT_NODE = "text";
 
 #endif //PROJECT_UTILS_H

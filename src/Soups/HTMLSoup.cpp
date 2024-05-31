@@ -1,4 +1,5 @@
 #include <string_view>
+#include <fstream>
 #include "HTMLSoup.h"
 #include "Tag.h"
 
@@ -20,4 +21,10 @@ std::vector<std::shared_ptr<Node>> HTMLSoup::find_all(std::string_view tag_name)
 
 std::string HTMLSoup::serialize() {
     return root_m.serialize_html();
+}
+
+void HTMLSoup::serialize_to_file(const std::filesystem::path& path) {
+    std::ofstream f{path};
+    f << serialize();
+    f.close();
 }

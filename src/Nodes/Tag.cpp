@@ -146,7 +146,7 @@ std::shared_ptr<Node> Tag::find(std::string_view tag_name) {
         if (child_tag_name == tag_name) {
             return child;
         }
-        if (child_tag_name != "text") {
+        if (child_tag_name != TEXT_NODE) {
             child_found = dynamic_cast<Tag*>(child.get())->find(tag_name);
             if (child_found) {
                 return child_found;
@@ -162,7 +162,7 @@ std::vector<std::shared_ptr<Node>> Tag::find_all(std::string_view tag_name) {
         if (child->get_tag_name() == tag_name) {
             found_tags.push_back(child);
         }
-        if (child->get_tag_name() != "text") {
+        if (child->get_tag_name() != TEXT_NODE) {
             auto child_nodes = dynamic_cast<Tag*>(child.get())->find_all(tag_name);
             for (auto &found_child: child_nodes) {
                 found_tags.push_back(found_child);
@@ -187,4 +187,17 @@ std::vector<std::shared_ptr<Node>> Tag::get_children() const {
 
 std::vector<std::shared_ptr<Node>> Tag::get_siblings() const {
     return dynamic_cast<Tag*>(parent_m)->get_children();
+}
+
+std::vector<std::shared_ptr<Node>> Tag::get_descendants() const {
+    std::vector<std::shared_ptr<Node>> descendants{children_m};
+    for (const auto& child : children_m) {
+        if (child->get_tag_name() != TEXT_NODE) {
+            auto child_descendants = dynamic_cast<Tag *>(child.get())->get_descendants();
+            for (const auto &descendant: child_descendants) {
+                descendants.push_back(descendant);
+            }
+        }
+    }
+    return descendants;
 }

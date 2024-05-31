@@ -22,15 +22,8 @@ public:
     std::string serialize_html() const override;
     std::vector<std::shared_ptr<Node>> get_children() const;
     virtual std::vector<std::shared_ptr<Node>> get_siblings() const override;
-
-
+    std::vector<std::shared_ptr<Node>> get_descendants() const;
     virtual ~Tag() override;
-
-//    virtual std::vector<Node> get_children();
-//    virtual std::vector<Node> get_descendants();
-//    virtual Node& find(std::regex pattern, AttributeType type=AttributeType::TAG_NAME);
-//    virtual Node& find(std::function <bool(Node)> predicate);
-//    virtual std::vector<Node> find_all(std::regex pattern, AttributeType type=AttributeType::TAG_NAME);
 };
 
 
