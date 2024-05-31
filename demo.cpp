@@ -5,7 +5,7 @@
 using namespace std::literals;
 
 int main() {
-    std::ifstream alice{"../data/alice.html"};
+    std::ifstream alice{"../data/alice_large.html"};
     std::string content{std::istreambuf_iterator<char>(alice), std::istreambuf_iterator<char>()};
 
     HTMLSoup soup{content};
@@ -31,6 +31,15 @@ int main() {
     }
 
     std::cout << "Find the names of children of the html tag and compare them with descendants" << std::endl;
-    
+    auto children = soup.get_root().get_children();
+    auto descendants = soup.get_root().get_descendants();
+    std::cout << "Children tags (only the direct children nodes)" << std::endl;
+    for (const auto& child : children) {
+        std::cout << child->get_tag_name() << std::endl;
+    }
+    std::cout << "Descendants tags (all the nodes lower in the hierarchy)" << std::endl;
+    for (const auto& descendant : descendants) {
+        std::cout << descendant->get_tag_name() << std::endl;
+    }
     return 0;
 }
