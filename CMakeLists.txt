@@ -74,6 +74,14 @@ add_executable(${CTEST_BUILD_NAME} tests.cpp
 target_link_libraries(${CTEST_BUILD_NAME} soupcxx)
 target_include_directories(${CTEST_BUILD_NAME} PRIVATE api)
 
+add_executable(parse_and_write benchmark/parse_and_write.cpp)
+target_link_libraries(parse_and_write soupcxx)
+target_include_directories(parse_and_write PRIVATE api)
+
+add_executable(find_all_links benchmark/find_all_links.cpp)
+target_link_libraries(find_all_links soupcxx)
+target_include_directories(find_all_links PRIVATE api)
+
 #! Add external packages
 # gtest
 include(FetchContent)
